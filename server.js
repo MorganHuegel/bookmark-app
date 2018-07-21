@@ -53,6 +53,7 @@ app.post('/bookmarks', (req, res, next) => {
     .returning(['id', 'title', 'rating', 'url', 'description'])
     .then( ([dbRes]) => {
       descriptionToDesc(dbRes);
+      console.log('DB RES: ', dbRes);
       res.json(dbRes);
     })
     .catch(err => next(err));

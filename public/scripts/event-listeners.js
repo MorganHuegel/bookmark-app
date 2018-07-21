@@ -76,7 +76,6 @@ const eventListeners = (function(){
         rating: newRating
       };
       api.addBookmark(newObject, response => {
-        console.log('success! New object in the server');
         response.detailView = false;
         response.editTitle = false;
         response.editRating = false;
