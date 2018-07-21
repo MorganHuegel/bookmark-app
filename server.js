@@ -13,7 +13,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const { validatePatchRequest, validatePostRequest, descriptionToDesc } = require('./validation-functions');
+const { validatePatchRequest, validatePostRequest } = require('./validation-functions');
 
 
 app.use(express.json());
@@ -26,7 +26,10 @@ app.get('/bookmarks', (req, res, next) => {
   knex('bookmarks')
     .select()
     .then(dbRes => {
-      dbRes.forEach(bookmark => descriptionToDesc(bookmark) );
+      dbRes.forEach(bookmark => {
+        bookmark.desc = bookmark.description;
+        delete bookmark.description;
+      } );
       res.json(dbRes);
     })
     .catch(err => next(err));
@@ -52,8 +55,8 @@ app.post('/bookmarks', (req, res, next) => {
     })
     .returning(['id', 'title', 'rating', 'url', 'description'])
     .then( ([dbRes]) => {
-      descriptionToDesc(dbRes);
-      console.log('DB RES: ', dbRes);
+      dbRes.desc = dbRes.description;
+      delete dbRes.description;
       res.json(dbRes);
     })
     .catch(err => next(err));
@@ -78,7 +81,8 @@ app.patch('/bookmarks/:id', (req, res, next) => {
     .returning(['id', 'title', 'description', 'url', 'rating'])
     .then( ([dbRes]) => {
       if(dbRes){
-        descriptionToDesc(dbRes);
+        dbRes.desc = dbRes.description;
+        delete dbRes.description;        
         res.json(dbRes);
       } else {
         next();

@@ -102,18 +102,9 @@ const validatePatchRequest = function(bookmarkObj){
 };
 
 
-const descriptionToDesc = function(bookmarkObj){
-  if(bookmarkObj.description){
-    bookmarkObj.desc = bookmarkObj.description;
-    delete bookmarkObj.description;
-  }
-};
-
-
 
 
 module.exports = {
   validatePatchRequest,
   validatePostRequest,
-  descriptionToDesc
 };
