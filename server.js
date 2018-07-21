@@ -1,6 +1,7 @@
 'use strict';
 
-const DATABASE_URL = 'postgres://localhost/bookmark';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgres://localhost/bookmark';
+//const ELEPHANT_URL = 'postgres://dadfkrcu:Fe_sqQGhLzoOifpDLXC99aDHEZdyLSlC@stampy.db.elephantsql.com:5432/dadfkrcu';
 
 const knex = require('knex')({
   client: 'pg',
@@ -12,26 +13,34 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const { validatePatchRequest, validatePostRequest, descriptionToDesc } = require('./validation-functions');
+
 
 app.use(express.json());
 app.use(express.static('./public'));
+
+
 
 
 app.get('/bookmarks', (req, res, next) => {
   knex('bookmarks')
     .select()
     .then(dbRes => {
-      dbRes.forEach(bookmark => {
-        bookmark.desc = bookmark.description;
-        delete bookmark.description;
-      });
+      dbRes.forEach(bookmark => descriptionToDesc(bookmark) );
       res.json(dbRes);
     })
     .catch(err => next(err));
 });
 
 
+
+
 app.post('/bookmarks', (req, res, next) => {
+  const validateErr = validatePostRequest(req.body);
+  if(validateErr){
+    return next(validateErr);
+  }
+
   const {title, rating, url, desc} = req.body;
 
   knex('bookmarks')
@@ -43,8 +52,7 @@ app.post('/bookmarks', (req, res, next) => {
     })
     .returning(['id', 'title', 'rating', 'url', 'description'])
     .then( ([dbRes]) => {
-      dbRes.desc = dbRes.description;
-      delete dbRes.description;
+      descriptionToDesc(dbRes);
       res.json(dbRes);
     })
     .catch(err => next(err));
@@ -52,28 +60,34 @@ app.post('/bookmarks', (req, res, next) => {
 
 
 
+
+
 app.patch('/bookmarks/:id', (req, res, next) => {
+  const validateErr = validatePatchRequest(req.body);
+  if(validateErr){
+    return next(validateErr);
+  }
+
   const id = req.params.id;
   const update = req.body;
-
-  if('desc' in update){
-    update.description = update.desc;
-    delete update.desc;
-  }
 
   knex('bookmarks')
     .where({'id':id})
     .update(update)
     .returning(['id', 'title', 'description', 'url', 'rating'])
     .then( ([dbRes]) => {
-      if(dbRes.description) {
-        dbRes.desc = dbRes.description;
-        delete dbRes.description;
+      if(dbRes){
+        descriptionToDesc(dbRes);
+        res.json(dbRes);
+      } else {
+        next();
       }
-      res.json(dbRes);
     })
     .catch(err => next(err));
 });
+
+
+
 
 
 app.delete('/bookmarks/:id', (req, res, next) => {
@@ -94,6 +108,7 @@ app.delete('/bookmarks/:id', (req, res, next) => {
 
 
 
+
 app.use('/', (req, res, next) => {
   const err = new Error('Not Found');
   err.status = 404;
@@ -102,7 +117,7 @@ app.use('/', (req, res, next) => {
 
 app.use('/', (err, req, res, next) => {
   if(err.status){
-    res.status(err.status).json({'message': err.message});
+    res.status(err.status).json({'status': err.status, 'message': err.message});
   } else {
     res.sendStatus(500);
   }

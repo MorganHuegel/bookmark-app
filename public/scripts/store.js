@@ -19,7 +19,8 @@ const store = (function() {
 
   //finds bookmark by id
   //reassigns its values to the new Data
-  const updateBookmark = function(id, newData) {
+  const updateBookmark = function(idString, newData) {
+    const id = parseInt(idString);
     Object.assign(this.bookmarks.find( index => index.id === id ), newData);
   };
 
