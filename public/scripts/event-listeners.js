@@ -65,7 +65,7 @@ const eventListeners = (function(){
       const newTitle = $('.js-add-title').val();
       const newUrl = $('.js-add-url').val();
       let newDesc = $('.js-add-desc').val();
-      if(newDesc === '') {
+      if(!newDesc) {
         newDesc = 'n/a';
       }
       const newRating = parseInt($('.js-add-rating').val());

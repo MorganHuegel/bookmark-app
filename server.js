@@ -44,15 +44,11 @@ app.post('/bookmarks', (req, res, next) => {
     return next(validateErr);
   }
 
-  const {title, rating, url, desc} = req.body;
+  const update = req.body;
+  console.log('REQ.BODY IS', req.body);
 
   knex('bookmarks')
-    .insert({
-      'title': title,
-      'rating': rating,
-      'url': url,
-      'description': desc
-    })
+    .insert(update)
     .returning(['id', 'title', 'rating', 'url', 'description'])
     .then( ([dbRes]) => {
       dbRes.desc = dbRes.description;
