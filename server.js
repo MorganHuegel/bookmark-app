@@ -1,7 +1,6 @@
 'use strict';
 
 const DATABASE_URL = process.env.DATABASE_URL || 'postgres://localhost/bookmark';
-//const ELEPHANT_URL = 'postgres://dadfkrcu:Fe_sqQGhLzoOifpDLXC99aDHEZdyLSlC@stampy.db.elephantsql.com:5432/dadfkrcu';
 
 const knex = require('knex')({
   client: 'pg',
@@ -45,7 +44,6 @@ app.post('/bookmarks', (req, res, next) => {
   }
 
   const update = req.body;
-  console.log('REQ.BODY IS', req.body);
 
   knex('bookmarks')
     .insert(update)
